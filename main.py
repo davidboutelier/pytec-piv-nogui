@@ -6,7 +6,7 @@ all_projects_path = '/media/dpb509/SSD/PROJECTS'
 source_path = '/media/dpb509/SSD/SOURCES'
 time_interval = 5
 time_unit = 's'
-exp_name = 'MH3'
+exp_name = 'SUB'
 
 t = os.path.isfile('log.txt')
 if t:
@@ -31,6 +31,3 @@ rotation_angle = -90
 pytec_fn.apply_correction(fraction_cores, rotation_angle)
 
 roi = pytec_fn.define_roi()
-for f in range(0, 1):
-    f1 = f
-    f2 = f1 + 1
