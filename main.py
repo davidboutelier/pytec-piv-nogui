@@ -2,8 +2,19 @@ import pytec_fn
 import os
 
 ## CREATE PROJECT
-all_projects_path = '/media/dpb509/SSD/PROJECTS'
-source_path = '/media/dpb509/SSD/SOURCES'
+
+from sys import platform
+if platform == "linux" or platform == "linux2":
+    all_projects_path = '/media/dpb509/SSD/PROJECTS'
+    source_path = '/media/dpb509/SSD/SOURCES'
+
+elif platform == "darwin":
+    all_projects_path = '/Volumes/SSD/PROJECTS'
+    source_path = '/Volumes/SSD/SOURCES'
+
+elif platform == "win32":
+    # Windows...
+
 time_interval = 5
 time_unit = 's'
 exp_name = 'SUB'
