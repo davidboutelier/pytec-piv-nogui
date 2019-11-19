@@ -13,7 +13,7 @@ elif platform == "darwin":
     source_path = '/Volumes/SSD/SOURCES'
 
 elif platform == "win32":
-    # Windows...
+    print('not implemented yet')
 
 time_interval = 5
 time_unit = 's'

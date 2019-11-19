@@ -813,31 +813,20 @@ def cor_2frames(f1, f2, iw, grid_x_flat, grid_y_flat, n_iw):
         stack1[:, :, i] = f1[y1_sub:y2_sub, x1_sub:x2_sub]
         stack2[:, :, i] = f2[y1_sub:y2_sub, x1_sub:x2_sub]
 
-        sub1 = f1[y1_sub:y2_sub, x1_sub:x2_sub]
-        sub2 = f2[y1_sub:y2_sub, x1_sub:x2_sub]
-
-        #c_map[:, :, i] = fftconvolve(sub1[:, :], sub2[::-1, ::-1], mode='same')
         c_map[:, :, i] = fftconvolve(stack1[:, :, i], stack2[::-1, ::-1, i], mode='same')
-
-        #util_fn.cli_progress_test(n_iw, bar_length=20)
 
         bar_length = 20
         end_val = n_iw
 
+        '''
         percent = float(i) / end_val
         hashes = '#' * int(round(percent * bar_length))
         spaces = ' ' * (bar_length - len(hashes))
         sys.stdout.write("\rPercent: [{0}] {1}%".format(hashes + spaces, int(round(percent * 100))))
         sys.stdout.flush()
+        '''
 
-    sys.stdout.write("\n")
-
-        #p = 100*i/n_iw
-        #sys.stdout.write("\r%d%%" % p)
-        #sys.stdout.flush()
-
-    #c_map = fftconvolve(stack1[:, :, :], stack2[::-1, ::-1, :], mode='same', axes=(0, 1))
-    #c_map = convolve_fft(stack1[:, :, :], stack2[::-1, ::-1, :])
+    #sys.stdout.write("\n")
 
     CF = c_map.reshape(-1, c_map.shape[-1])
     P = np.max(CF, axis=0)  # peak value
@@ -848,35 +837,6 @@ def cor_2frames(f1, f2, iw, grid_x_flat, grid_y_flat, n_iw):
     SNR = (P - M) / S
 
     return [c_map, P, PP, PP2, M, S, SNR]
-
-
-def pre_proc(img, gaussian_sigma,kernel_normal):
-    from skimage import util
-    from skimage import filters
-    from skimage import exposure
-    from skimage import io, img_as_uint, img_as_float
-    import numpy as np
-    import warnings
-
-    # convert to 16-bit
-    warnings.filterwarnings("ignore", category=UserWarning)
-    img_f = img_as_float(img)
-
-    img_max = np.max(img_f.flatten())
-    img_min = np.min(img_f.flatten())
-    img2 = (img - img_min) / (img_max - img_min)
-
-    # invert image
-    img3 = util.invert(img2)
-
-    # subtract gaussian blur
-    background = filters.gaussian(img3, sigma=gaussian_sigma, preserve_range=True)
-    img4 = img3 - background
-
-    # Adaptive Equalization
-    img5 = exposure.equalize_adapthist(img4, kernel_size=kernel_normal, clip_limit=0.01, nbins=256)
-
-    return img5
 
 
 def cor_sub_pix(c_map, peak_g, n_iw):
@@ -946,7 +906,34 @@ def define_mask(roi, iw, n_iw_x, n_iw_y, n_iw):
 
     return mask
 
+def pre_proc(img, gaussian_sigma, kernel_normal):
+    from skimage import util
+    from skimage import filters
+    from skimage import exposure
+    from skimage import img_as_float
+    import numpy as np
+    import warnings
 
+    # convert to 16-bit
+    warnings.filterwarnings("ignore", category=UserWarning)
+    img_f = img_as_float(img)
+
+    # equalize histogram
+    img_max = np.max(img_f.flatten())
+    img_min = np.min(img_f.flatten())
+    img2 = (img - img_min) / (img_max - img_min)
+
+    # invert image
+    img3 = util.invert(img2)
+
+    # subtract gaussian blur
+    background = filters.gaussian(img3, sigma=gaussian_sigma, preserve_range=True)
+    img4 = img3 - background
+
+    # Adaptive Equalization
+    img5 = exposure.equalize_adapthist(img4, kernel_size=kernel_normal, clip_limit=0.01, nbins=256)
+
+    return img5
 
 
 

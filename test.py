@@ -7,11 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import time
+from joblib import Parallel, delayed
 
 start = time.time()
 
 roi = pytec_fn.define_roi()
-iw = 128
+iw = 64
 
 plot_fig_cmap = 1
 plot_vec = 1
@@ -36,39 +37,47 @@ with open('project_metadata.json') as f:
     n_exp_img = source['number_experiment_images']
 
 # main loop
-for f in range(1, n_exp_img):
 
-    gaussian_sigma = 64
-    kernel_normal = 64
+r = [0, 1]
+gaussian_sigma = 64
+kernel_normal = 64
+
+if plot_fig_cmap == 1:
+    export_folder = os.path.join(project_path, project_name, 'EXP', 'CORRECTED', 'EXPORT')
+    t = os.path.exists(export_folder)
+
+    if t:
+        counter = 1
+        while t:
+            new_export_folder = export_folder + '_' + str(counter)
+            t = os.path.exists(new_export_folder)
+            counter += 1
+    else:
+        new_export_folder = export_folder
+
+    os.mkdir(new_export_folder)
+
+for f in range(1, n_exp_img):
 
     f1 = img_as_float(io.imread(os.path.join(project_path, project_name, 'EXP', 'CORRECTED', 'IMG_'+str(f)+'.tif')))
     f2 = img_as_float(io.imread(os.path.join(project_path, project_name, 'EXP', 'CORRECTED', 'IMG_' + str(f+1) + '.tif')))
 
-    f1p = pytec_fn.pre_proc(f1, gaussian_sigma, kernel_normal)
-    f2p = pytec_fn.pre_proc(f2, gaussian_sigma, kernel_normal)
+    fr = [f1, f2]
+
+    frp = Parallel(n_jobs=2)(delayed(pytec_fn.pre_proc)(i, gaussian_sigma, kernel_normal) for i in fr)
+
+    f1p = frp[0]
+    f2p = frp[1]
 
     grid_x_flat, grid_y_flat, n_iw_x, n_iw_y, n_iw = pytec_fn.split_2frames(iw, roi)
     C, P, PP, PP2, M, S, SNR = pytec_fn.cor_2frames(f1p, f2p, iw, grid_x_flat, grid_y_flat, n_iw)
+
+    util_fn.dprint('vector field is: ' + str(int(n_iw_x))+' by ' + str(int(n_iw_y)))
 
     grid_x = np.reshape(grid_x_flat, (int(n_iw_y), int(n_iw_x)))
     grid_y = np.reshape(grid_y_flat, (int(n_iw_y), int(n_iw_x)))
 
     if plot_fig_cmap == 1:
-
-        export_folder = os.path.join(project_path, project_name, 'EXP', 'CORRECTED', 'EXPORT')
-
-        t = os.path.exists(export_folder)
-        if t:
-            counter = 1
-            while t:
-                new_export_folder = export_folder + '_' + str(counter)
-                t = os.path.exists(new_export_folder)
-                counter += 1
-
-        else:
-            new_export_folder = export_folder
-
-        os.mkdir(new_export_folder)
 
         k = int(np.floor(n_iw_x * np.floor(n_iw_y/2)) + np.floor(n_iw_x/2))
 
@@ -86,7 +95,8 @@ for f in range(1, n_exp_img):
         ax_0.tick_params(labelsize=7)
 
         fig.canvas.draw()
-        fig.savefig('ROI_PTS' + str(f) + '_' + str(k) + '.png', bbox_inches='tight')
+        fig.savefig(os.path.join(new_export_folder, 'ROI_PTS-' + str(f) + '_' + str(k) + '.pdf'), bbox_inches='tight')
+        #fig.savefig('ROI_PTS' + str(f) + '_' + str(k) + '.png', bbox_inches='tight')
         plt.pause(1)
         plt.close(fig)
 
@@ -126,7 +136,7 @@ for f in range(1, n_exp_img):
     dy = dy_i_g + sub_dy_g
 
     if plot_vec == 1:
-        N = 1
+        N = 2
         xr = grid_x[::N, ::N]
         yr = grid_y[::N, ::N]
         dxr = dx[::N, ::N]
@@ -193,7 +203,7 @@ for f in range(1, n_exp_img):
             hf.create_dataset('Dx', data=dx)
             hf.create_dataset('Dy', data=dy)
 
-    print('image pair ' + str(f) + '/10 done: ' + str(100 * f / 10) + ' %')
+    print('image pair ' + str(f) + '/' + str(int(n_exp_img)) +' done: ' + str(100 * f / n_exp_img) + ' %')
 
 end = time.time()
 print(' ')

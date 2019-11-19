@@ -332,3 +332,27 @@ using 4 cores
 - image /Volumes/SSD/PROJECTS/SUB_2/EXP/IMG_150.tif corrected
 - image /Volumes/SSD/PROJECTS/SUB_2/EXP/IMG_151.tif corrected
 correction completed in 62196.679580926895 s
+vector field is :23 by 53
+vector field is :23 by 53
+vector field is :23 by 53
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
+vector field is: 23 by 59
