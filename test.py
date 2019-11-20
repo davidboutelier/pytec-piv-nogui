@@ -176,7 +176,7 @@ for f in range(1, n_exp_img):
         plt.pause(1)
         plt.close(fig4)
 
-    if plot_hist ==1:
+    if plot_hist == 1:
         fig5 = plt.figure(figsize=(8, 4))
         ax5 = fig5.add_subplot(1, 2, 1)
 
