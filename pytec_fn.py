@@ -152,9 +152,6 @@ def import_images_fn(fraction_cores):
                                                                                   list_img[frame_num]),
                                                           project_path_calib_img) for frame_num in range(0, n_calib_img))
 
-    #for frame_num in range(0, n_calib_img):
-    #    convert_dng_image(frame_num, os.path.join(source_path_calib_img, list_img[frame_num]), project_path_calib_img)
-
     # now import the experiment images
     dprint('importing experiment images')
     source_path_exp_img = os.path.join(source_path, exp_name, 'EXP')
@@ -173,9 +170,6 @@ def import_images_fn(fraction_cores):
     Parallel(n_jobs=use_cores)(delayed(convert_dng_image)(frame_num,
                                                           os.path.join(source_path_exp_img, list_img[frame_num]),
                                                           project_path_exp_img) for frame_num in range(0, n_exp_img))
-    #for frame_num in range(0, n_exp_img):
-     #   convert_dng_image(frame_num, os.path.join(source_path_exp_img, list_img[frame_num]), project_path_exp_img)
-
     # save the metadata
     project_data['source'].append({
         'number_calibration_images': n_calib_img,

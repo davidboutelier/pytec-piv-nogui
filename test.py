@@ -39,7 +39,6 @@ with open('project_metadata.json') as f:
     n_exp_img = source['number_experiment_images']
 
 # main loop
-
 r = [0, 1]
 gaussian_sigma = 64
 kernel_normal = 64
@@ -118,7 +117,7 @@ for f in range(1, n_exp_img):
         ax2_0.tick_params(labelsize=7)
         util_fn.colorbar(im2)
         fig2.canvas.draw()
-        fig2.savefig(os.path.join(new_export_folder,'SNR-' + str(f) + '.pdf'), bbox_inches='tight')
+        fig2.savefig(os.path.join(new_export_folder, 'SNR-' + str(f) + '.pdf'), bbox_inches='tight')
         plt.pause(1)
         plt.close(fig2)
 
@@ -160,7 +159,7 @@ for f in range(1, n_exp_img):
         ax3_0.set_aspect('equal')
         ax3_0.tick_params(labelsize=7)
         fig3.canvas.draw()
-        fig3.savefig(os.path.join(new_export_folder,'vectors_map-' + str(f) + '.pdf'), bbox_inches='tight')
+        fig3.savefig(os.path.join(new_export_folder, 'vectors_map-' + str(f) + '.pdf'), bbox_inches='tight')
         plt.pause(1)
         plt.close(fig3)
 
@@ -173,7 +172,7 @@ for f in range(1, n_exp_img):
         ax4.set_xlabel('dx', fontsize=7)
         ax4.tick_params(labelsize=7)
         fig4.canvas.draw()
-        fig4.savefig(os.path.join(new_export_folder,'cloud_map-' + str(f) + '.pdf'), bbox_inches='tight')
+        fig4.savefig(os.path.join(new_export_folder, 'cloud_map-' + str(f) + '.pdf'), bbox_inches='tight')
         plt.pause(1)
         plt.close(fig4)
 
@@ -192,7 +191,7 @@ for f in range(1, n_exp_img):
         ax6.set_xlabel('dx', fontsize=7)
         ax6.tick_params(labelsize=7)
         fig5.canvas.draw()
-        fig5.savefig(os.path.join(new_export_folder,'histogram-' + str(f) + '.pdf'), bbox_inches='tight')
+        fig5.savefig(os.path.join(new_export_folder, 'histogram-' + str(f) + '.pdf'), bbox_inches='tight')
         plt.pause(1)
         plt.close(fig5)
 
@@ -209,7 +208,7 @@ for f in range(1, n_exp_img):
             hf.create_dataset('Dx', data=dx)
             hf.create_dataset('Dy', data=dy)
 
-    print('image pair ' + str(f) + '/' + str(int(n_exp_img)) +' done: ' + str(int(10*100 * f / n_exp_img)/10) + '%')
+    print('image pair ' + str(f) + '/' + str(int(n_exp_img)) + ' done: ' + str(int(10*100 * f / n_exp_img)/10) + '%')
 
 end = time.time()
 print(' ')
