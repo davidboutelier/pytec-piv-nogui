@@ -144,12 +144,16 @@ def import_images_fn(fraction_cores):
     else:
         os.mkdir(project_path_calib_img)
 
-    list_img = os.listdir(source_path_calib_img)
+    list_img = sorted(os.listdir(source_path_calib_img))
+
     n_calib_img = len(list_img)
 
-    Parallel(n_jobs=use_cores)(delayed(convert_dng_image)(frame_num,
-                                                          os.path.join(source_path_calib_img, list_img[frame_num]),
+    Parallel(n_jobs=use_cores)(delayed(convert_dng_image)(frame_num, os.path.join(source_path_calib_img,
+                                                                                  list_img[frame_num]),
                                                           project_path_calib_img) for frame_num in range(0, n_calib_img))
+
+    #for frame_num in range(0, n_calib_img):
+    #    convert_dng_image(frame_num, os.path.join(source_path_calib_img, list_img[frame_num]), project_path_calib_img)
 
     # now import the experiment images
     dprint('importing experiment images')
@@ -163,12 +167,14 @@ def import_images_fn(fraction_cores):
     else:
         os.mkdir(project_path_exp_img)
 
-    list_img = os.listdir(source_path_exp_img)  # dir is your directory path
+    list_img = sorted(os.listdir(source_path_exp_img))  # dir is your directory path
     n_exp_img = len(list_img)
 
     Parallel(n_jobs=use_cores)(delayed(convert_dng_image)(frame_num,
                                                           os.path.join(source_path_exp_img, list_img[frame_num]),
                                                           project_path_exp_img) for frame_num in range(0, n_exp_img))
+    #for frame_num in range(0, n_exp_img):
+     #   convert_dng_image(frame_num, os.path.join(source_path_exp_img, list_img[frame_num]), project_path_exp_img)
 
     # save the metadata
     project_data['source'].append({
@@ -473,7 +479,7 @@ def find_calibration_fn(fn_type, calib_poly_order, calib_board, calib_unit):
         json.dump(project_data, outfile)
 
 
-def subimage_CP(img, x, y , dx, dy):
+def subimage_CP(img, x, y, dx, dy):
     import numpy as np
     from skimage import io, img_as_float, img_as_uint
     from skimage.feature import corner_harris, corner_subpix, corner_peaks
@@ -710,7 +716,12 @@ def apply_correction(fraction_cores, rotation_angle):
     Parallel(n_jobs=use_cores)(delayed(correct_image)(project_path,
                                                       project_name,
                                                       frame_num,
-                                                      cor_method, cor_order, rotation_angle) for frame_num in range(0, n_exp_img-1))
+                                                      cor_method,
+                                                      cor_order,
+                                                      rotation_angle) for frame_num in range(0, n_exp_img-1))
+
+    #for frame_num in range(0, n_exp_img-1):
+    #    correct_image(project_path, project_name, frame_num, cor_method, cor_order, rotation_angle)
 
     end_time = time.time()  # for measuring CPU time
     elapsed_time = end_time - start_time
@@ -814,19 +825,6 @@ def cor_2frames(f1, f2, iw, grid_x_flat, grid_y_flat, n_iw):
         stack2[:, :, i] = f2[y1_sub:y2_sub, x1_sub:x2_sub]
 
         c_map[:, :, i] = fftconvolve(stack1[:, :, i], stack2[::-1, ::-1, i], mode='same')
-
-        bar_length = 20
-        end_val = n_iw
-
-        '''
-        percent = float(i) / end_val
-        hashes = '#' * int(round(percent * bar_length))
-        spaces = ' ' * (bar_length - len(hashes))
-        sys.stdout.write("\rPercent: [{0}] {1}%".format(hashes + spaces, int(round(percent * 100))))
-        sys.stdout.flush()
-        '''
-
-    #sys.stdout.write("\n")
 
     CF = c_map.reshape(-1, c_map.shape[-1])
     P = np.max(CF, axis=0)  # peak value

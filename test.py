@@ -14,9 +14,11 @@ start = time.time()
 roi = pytec_fn.define_roi()
 iw = 64
 
-plot_fig_cmap = 1
+plot_roi = 0
+plot_cmap = 0
 plot_vec = 1
-plot_stats = 1
+plot_cloud = 0
+plot_hist = 0
 save_files = 1
 
 # read the data json
@@ -42,7 +44,7 @@ r = [0, 1]
 gaussian_sigma = 64
 kernel_normal = 64
 
-if plot_fig_cmap == 1:
+if plot_cmap == 1 or plot_hist == 1 or plot_cloud == 1 or plot_roi == 1 or plot_vec == 1:
     export_folder = os.path.join(project_path, project_name, 'EXP', 'CORRECTED', 'EXPORT')
     t = os.path.exists(export_folder)
 
@@ -72,12 +74,11 @@ for f in range(1, n_exp_img):
     grid_x_flat, grid_y_flat, n_iw_x, n_iw_y, n_iw = pytec_fn.split_2frames(iw, roi)
     C, P, PP, PP2, M, S, SNR = pytec_fn.cor_2frames(f1p, f2p, iw, grid_x_flat, grid_y_flat, n_iw)
 
-    util_fn.dprint('vector field is: ' + str(int(n_iw_x))+' by ' + str(int(n_iw_y)))
-
+    SNR_g = np.reshape(SNR, (int(n_iw_y), int(n_iw_x)))
     grid_x = np.reshape(grid_x_flat, (int(n_iw_y), int(n_iw_x)))
     grid_y = np.reshape(grid_y_flat, (int(n_iw_y), int(n_iw_x)))
 
-    if plot_fig_cmap == 1:
+    if plot_roi == 1:
 
         k = int(np.floor(n_iw_x * np.floor(n_iw_y/2)) + np.floor(n_iw_x/2))
 
@@ -96,10 +97,10 @@ for f in range(1, n_exp_img):
 
         fig.canvas.draw()
         fig.savefig(os.path.join(new_export_folder, 'ROI_PTS-' + str(f) + '_' + str(k) + '.pdf'), bbox_inches='tight')
-        #fig.savefig('ROI_PTS' + str(f) + '_' + str(k) + '.png', bbox_inches='tight')
         plt.pause(1)
         plt.close(fig)
 
+    if plot_cmap == 1:
         fig1 = plt.figure(figsize=(5, 3))
         ax1_0 = fig1.add_subplot(1, 1, 1)
         im1 = ax1_0.imshow(C[:, :, k], cmap='viridis')
@@ -112,7 +113,7 @@ for f in range(1, n_exp_img):
 
         fig2 = plt.figure(figsize=(6, 4))
         ax2_0 = fig2.add_subplot(1, 1, 1)
-        SNR_g = np.reshape(SNR, (int(n_iw_y), int(n_iw_x)))
+
         im2 = ax2_0.imshow(SNR_g)
         ax2_0.tick_params(labelsize=7)
         util_fn.colorbar(im2)
@@ -134,6 +135,9 @@ for f in range(1, n_exp_img):
 
     dx = dx_i_g + sub_dx_g
     dy = dy_i_g + sub_dy_g
+
+    dx[SNR_g < 3] = np.nan
+    dy[SNR_g < 3] = np.nan
 
     if plot_vec == 1:
         N = 2
@@ -160,6 +164,7 @@ for f in range(1, n_exp_img):
         plt.pause(1)
         plt.close(fig3)
 
+    if plot_cloud == 1:
         fig4 = plt.figure(figsize=(4, 4))
         ax4 = fig4.add_subplot(1, 1, 1)
         ax4.plot(-1 * dx.flatten(), -1 * dy.flatten(), '+', color='slategrey')
@@ -172,6 +177,7 @@ for f in range(1, n_exp_img):
         plt.pause(1)
         plt.close(fig4)
 
+    if plot_hist ==1:
         fig5 = plt.figure(figsize=(8, 4))
         ax5 = fig5.add_subplot(1, 2, 1)
 
@@ -203,7 +209,7 @@ for f in range(1, n_exp_img):
             hf.create_dataset('Dx', data=dx)
             hf.create_dataset('Dy', data=dy)
 
-    print('image pair ' + str(f) + '/' + str(int(n_exp_img)) +' done: ' + str(100 * f / n_exp_img) + ' %')
+    print('image pair ' + str(f) + '/' + str(int(n_exp_img)) +' done: ' + str(int(10*100 * f / n_exp_img)/10) + '%')
 
 end = time.time()
 print(' ')
